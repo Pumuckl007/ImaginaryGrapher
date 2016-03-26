@@ -32,9 +32,9 @@ class Graph{
     let zoom = zAndC.zoom;
     let center = zAndC.center;
     this.ctx.save();
-    this.ctx.translate(Math.random(), 0);
+    this.ctx.translate(center.x, center.y);
     this.ctx.scale(zoom, zoom);
-    console.log(center.x, center.y);
+    console.log(center.x, center.y, zoom, this.getResolution());
     this.ctx.fillStyle = "orange";
     this.ctx.beginPath();
     if(this.points[0]){
@@ -48,19 +48,17 @@ class Graph{
     this.ctx.restore();
   }
 
-  getAspect(){
-    return this.canvas.offsetWidth/this.canvas.offsetHeight;
+  getResolution(){
+    return [this.canvas.offsetWidth,this.canvas.offsetHeight];
   }
 
   getZoomAndCenter(){
     let max = this.getMax();
-    let aspect = this.getAspect();
     let width = max[1]-max[0];
     let height = max[3]-max[2];
-    let center = {x:width/2, y:height/2};
-    let scaleMax = Math.max(width, height*aspect);
-    let pixleWidth = this.canvas.offsetWidth;
-    let zoom = pixleWidth/scaleMax;
+    let resolution = this.getResolution();
+        let zoom = Math.min(resolution[0]/width, resolution[1]/height);
+    let center = {x:resolution[0]/2 - width*zoom/2, y:resolution[1]/2 - height*zoom/2};
     return {zoom: zoom, center: center};
   }
 
