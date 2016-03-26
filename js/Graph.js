@@ -10,11 +10,29 @@ class Graph{
     this.canvas.width = this.dom.offsetWidth;
     this.canvas.height = this.dom.offsetHeight;
     this.canvas.addEventListener('click', function() {
-      self.points.push({x:Math.random()*100, y:Math.random()*100});
-      self.points.push({x:Math.random()*100, y:Math.random()*100});
-      self.points.push({x:Math.random()*100, y:Math.random()*100});
+      let val = 36;
+      self.reset();
+      for(let i = 0; i<val; i++){
+        self.points.push({x:Math.cos(2*Math.PI*i/val)*10+Math.random()-0.5, y:Math.sin(2*Math.PI*i/val)*10+Math.random()-0.5});
+      }
       self.render();
      }, false);
+  }
+
+  repaint(t){
+    let val = 70;
+    this.reset();
+    for(let i = 0; i<val; i++){
+      this.points.push({x:Math.cos(2*Math.PI*i/val)*10+Math.sin(t)*Math.cos(Math.PI*i*3/35),
+         y:Math.sin(2*Math.PI*i/val)*10+Math.cos(t)*Math.sin(Math.PI*i*3/35)});
+    }
+    this.render();
+  }
+
+  reset(){
+    while(this.points.length > 0) {
+      this.points.pop();
+    }
   }
 
   fit(){
@@ -34,7 +52,6 @@ class Graph{
     this.ctx.save();
     this.ctx.translate(center.x, center.y);
     this.ctx.scale(zoom, zoom);
-    console.log(center.x, center.y, zoom, this.getResolution());
     this.ctx.fillStyle = "orange";
     this.ctx.beginPath();
     if(this.points[0]){
@@ -56,14 +73,15 @@ class Graph{
     let max = this.getMax();
     let width = max[1]-max[0];
     let height = max[3]-max[2];
+    let imageCenter = [(max[0]+max[1])/2,(max[2]+max[3])/2];
     let resolution = this.getResolution();
-        let zoom = Math.min(resolution[0]/width, resolution[1]/height);
-    let center = {x:resolution[0]/2 - width*zoom/2, y:resolution[1]/2 - height*zoom/2};
+    let zoom = Math.min(resolution[0]/width, resolution[1]/height);
+    let center = {x:resolution[0]/2 - imageCenter[0]*zoom, y:resolution[1]/2 - imageCenter[1]*zoom};
     return {zoom: zoom, center: center};
   }
 
   getMax(){
-    let max = [Number.MAX_VALUE,Number.MIN_VALUE,Number.MAX_VALUE,Number.MIN_VALUE];
+    let max = [this.points[0].x, this.points[0].x, this.points[0].y, this.points[0].y];
     for(let point of this.points){
       max[0] = Math.min(point.x, max[0]);
       max[1] = Math.max(point.x, max[1]);
@@ -74,3 +92,8 @@ class Graph{
   }
 }
 var graph = new Graph(document.getElementById("canvasWrap"));
+var f = function(){
+       window.requestAnimationFrame(f);
+       graph.repaint(Date.now()/1000);
+};
+f();
