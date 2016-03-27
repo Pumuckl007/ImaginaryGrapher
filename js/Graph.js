@@ -5,6 +5,8 @@ class Graph{
     this.canvas = domElement.firstElementChild;
     this.ctx = this.canvas.getContext('2d');
     this.points = [];
+    this.colors = [];
+    this.shouldDrawPoints = false;
     var self = this;
     this.canvas.width = this.dom.offsetWidth;
     this.canvas.height = this.dom.offsetHeight;
@@ -39,8 +41,14 @@ class Graph{
     this.canvas.height = canvas.offsetHeight;
   }
 
-  setPoints(points){
+  setPoints(points, colors){
     this.points = points;
+    if(colors){
+      this.colors = colors;
+      this.shouldDrawPoints = true;
+    } else {
+      this.shouldDrawPoints = false;
+    }
   }
 
   render(){
@@ -52,7 +60,7 @@ class Graph{
     this.ctx.translate(center.x, center.y);
     this.ctx.scale(zoom, zoom);
     this.ctx.fillStyle = "orange";
-    this.ctx.strokeWidth = "1px";
+    this.ctx.lineWidth = 1/zoom;
     this.ctx.beginPath();
     if(this.points && this.points[0]){
       this.ctx.moveTo(this.points[0].x, this.points[0].y);
@@ -62,11 +70,42 @@ class Graph{
       this.ctx.lineTo(this.points[0].x, this.points[0].y);
     }
     this.ctx.fill();
+    this.ctx.stroke();
+    if(this.shouldDrawPoints){
+      this.drawPoints(zoom);
+    }
+    this.drawAxis(zoom);
     this.ctx.restore();
   }
 
-  graph(points){
-    this.setPoints(points);
+  drawPoints(zoom){
+    if(!this.colors || this.colors.length != this.points.length)
+      return;
+    console.log()
+    for(let i = 0; i<this.points.length; i++){
+      let point = this.points[i];
+      this.ctx.fillStyle = "#" + this.colors[i].c.toString(16);
+      this.ctx.beginPath();
+      this.ctx.arc(point.x, point.y, 5/zoom,0,Math.PI*2,true);
+      this.ctx.fill();
+    }
+  }
+
+  drawAxis(zoom){
+    this.ctx.save();
+
+    this.ctx.beginPath();
+    let res = this.getResolution();
+    this.ctx.moveTo(-1, 0);
+    this.ctx.lineTo(1, 0);
+    this.ctx.moveTo(0, -1);
+    this.ctx.lineTo(0, 1);
+    this.ctx.stroke();
+    this.ctx.restore();
+  }
+
+  graph(points, color){
+    this.setPoints(points, (color) ? color : null);
     this.render();
   }
 

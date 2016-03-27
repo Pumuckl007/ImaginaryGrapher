@@ -69,6 +69,7 @@ class UI{
     let vars = {};
     let changeing = [];
     let input = [];
+    let colors = [];
     for(let index in this.vars){
       vars[index] = this.vars[index].childNodes[1].value;
     }
@@ -76,13 +77,14 @@ class UI{
       for(let k = 1; k<=1; k++){
         let x = Math.cos(i/50*Math.PI)*k;
         let y = Math.sin(i/50*Math.PI)*k;
+        colors.push({c:0x10101 * ~~(i*256/100)})
         input.push({x:x, y:y});
         changeing.push({x: x + " + i*" + y});
       }
     }
     let answerPoints = this.numberConverter.convertAnswersToPoints(vars,changeing);
-    this.graph.graph(answerPoints);
-    this.input.graph(input)
+    this.graph.graph(answerPoints, colors);
+    this.input.graph(input, colors)
   }
 
 
@@ -160,5 +162,6 @@ class EventHandler{
     MathJax.Hub.Queue(
       ["Typeset",MathJax.Hub,element]
     );
+    this.uI.callBack();
   }
 }
