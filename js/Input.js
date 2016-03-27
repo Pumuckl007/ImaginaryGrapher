@@ -10,7 +10,7 @@
 
     static onChange(vars){
       for(let listener of listeners){
-        listener(vars);
+        listener.event(vars);
       }
     }
   }
@@ -18,12 +18,15 @@
 }
 
 class UI{
-  constructor(){
+  constructor(canvas, input, numberConverter){
     this.vars = {};
     this.hidden = {};
     this.ul = document.createElement("ul");
     this.ul.className = "varList";
     this.hasBeenAdded = false;
+    this.graph = canvas;
+    this.input = input;
+    this.numberConverter = numberConverter;
   }
 
   getValues(){
@@ -55,11 +58,33 @@ class UI{
     this.vars[name] = divWrapper;
     this.vars[name].valueUI = "0";
     let vars = this.vars;
+    let self = this;
     input.onchange = function(event){
       vars[name].valueUI = event.srcElement.value;
-      callBack();
+      self.callBack();
     }
   }
+
+  callBack(){
+    let vars = {};
+    let changeing = [];
+    let input = [];
+    for(let index in this.vars){
+      vars[index] = this.vars[index].childNodes[1].value;
+    }
+    for(let i = 0; i<100; i++){
+      for(let k = 1; k<=1; k++){
+        let x = Math.cos(i/50*Math.PI)*k;
+        let y = Math.sin(i/50*Math.PI)*k;
+        input.push({x:x, y:y});
+        changeing.push({x: x + " + i*" + y});
+      }
+    }
+    let answerPoints = this.numberConverter.convertAnswersToPoints(vars,changeing);
+    this.graph.graph(answerPoints);
+    this.input.graph(input)
+  }
+
 
   clearVars(){
     for(let index in this.vars){
@@ -108,29 +133,32 @@ class UI{
   }
 }
 
-let render = function(evnt){
-  if(!(evnt.srcElement.value) || !(evnt.srcElement.value.length > 0)){
-    return;
+class EventHandler{
+  constructor(ui, numberConverter){
+    this.uI = ui;
+    this.numberConverter = numberConverter;
   }
-  let letters = "abcdfghjklmnopqrstuvwyz";
-  let string = evnt.srcElement.value.toLowerCase();
-  uI.clearVars();
-  for(let i = 0; i<string.length; i++){
-    if(string[i] != "p" && !(string.length-2 > i && string[i+1] === "i")){
-      if(letters.indexOf(string[i]) >= 0){
-        uI.addVar(string[i]);
+
+  event(evnt){
+    if(!(evnt.srcElement.value) || !(evnt.srcElement.value.length > 0)){
+      return;
+    }
+    let letters = "abcdfghjklmnopqrstuvwyz";
+    let string = evnt.srcElement.value.toLowerCase();
+    this.uI.clearVars();
+    for(let i = 0; i<string.length; i++){
+      if(string[i] != "p" || !(string.length-1 > i && string[i+1] === "i")){
+        if(letters.indexOf(string[i]) >= 0){
+          this.uI.addVar(string[i]);
+        }
       }
     }
+    this.uI.updateDisplay();
+    this.numberConverter.setEquation(evnt.srcElement.value);
+    let element = document.getElementById("output");
+    element.textContent = "`" + evnt.srcElement.value + "`";
+    MathJax.Hub.Queue(
+      ["Typeset",MathJax.Hub,element]
+    );
   }
-  uI.updateDisplay();
-  numberConverter.setEquation(evnt.srcElement.value);
-  let element = document.getElementById("output");
-  element.textContent = "`" + evnt.srcElement.value + "`";
-  MathJax.Hub.Queue(
-    ["Typeset",MathJax.Hub,element]
-  );
 }
-
-Input.registerListiner(render);
-
-var uI = new UI();

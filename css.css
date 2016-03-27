@@ -30,14 +30,18 @@
   margin-left: 1em;
 }
 
-.canvasWrap{
+.canvasWrap, .canvasWrap2{
   position:absolute;
-  left:20%;
-  width:80%;
+  left:60%;
+  width:40%;
   right:0;
   top:40px;
   bottom:0;
   overflow:hidden;
+}
+
+.canvasWrap2{
+  left:20%;
 }
 
 ul

@@ -2,7 +2,6 @@
 class Graph{
   constructor(domElement){
     this.dom = domElement;
-    console.log(this);
     this.canvas = domElement.firstElementChild;
     this.ctx = this.canvas.getContext('2d');
     this.points = [];
@@ -53,8 +52,9 @@ class Graph{
     this.ctx.translate(center.x, center.y);
     this.ctx.scale(zoom, zoom);
     this.ctx.fillStyle = "orange";
+    this.ctx.strokeWidth = "1px";
     this.ctx.beginPath();
-    if(this.points[0]){
+    if(this.points && this.points[0]){
       this.ctx.moveTo(this.points[0].x, this.points[0].y);
       for(let point of this.points){
         this.ctx.lineTo(point.x, point.y);
@@ -63,6 +63,11 @@ class Graph{
     }
     this.ctx.fill();
     this.ctx.restore();
+  }
+
+  graph(points){
+    this.setPoints(points);
+    this.render();
   }
 
   getResolution(){
@@ -81,6 +86,9 @@ class Graph{
   }
 
   getMax(){
+    if(!this.points || this.points.length < 0){
+      return [0,0,0,0];
+    }
     let max = [this.points[0].x, this.points[0].x, this.points[0].y, this.points[0].y];
     for(let point of this.points){
       max[0] = Math.min(point.x, max[0]);
@@ -91,9 +99,3 @@ class Graph{
     return max;
   }
 }
-var graph = new Graph(document.getElementById("canvasWrap"));
-var f = function(){
-       window.requestAnimationFrame(f);
-       graph.repaint(Date.now()/1000);
-};
-f();

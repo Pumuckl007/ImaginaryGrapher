@@ -8,6 +8,7 @@ class NumberConverter{
 
   evalEquation(vars){
     for(let index in vars){
+      console.log(index + " " + vars[index]);
       this.parser.eval(index + " = " + vars[index]);
     }
     return this.parser.eval(this.equation);
@@ -26,5 +27,13 @@ class NumberConverter{
     }
     return answers;
   }
+
+  convertAnswersToPoints(vars, changeing){
+    let answers = this.evalEquationChangeing(vars, changeing);
+    let points = [];
+    for(let answer of answers){
+      points.push({x:answer.re, y:answer.im});
+    }
+    return points;
+  }
 }
-var numberConverter = new NumberConverter();
